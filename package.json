@@ -1,0 +1,31 @@
+{
+  "name": "vivi-virtual-vinyl",
+  "productName": "VIVI - Virtual Vinyl",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently \"vite --host 127.0.0.1 --strictPort\" \"wait-on http://127.0.0.1:5173 && electron .\"",
+    "build": "tsc -b && vite build",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "@vitejs/plugin-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "three": "^0.185.1",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "concurrently": "latest",
+    "electron": "latest",
+    "typescript": "latest",
+    "wait-on": "latest"
+  }
+}

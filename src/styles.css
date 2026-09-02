@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+
+:root { --accent:#d76537; font-family: 'DM Sans', sans-serif; color: #f8f1e7; background: #161410; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 720px; background: #161410; }
+button, input { font: inherit; }
+button { color: inherit; cursor: pointer; }
+.app-shell { height: 100vh; overflow: hidden; display: grid; grid-template-columns: clamp(210px, 18vw, 285px) minmax(0, 1fr) clamp(275px, 22vw, 360px); background: radial-gradient(circle at 55% 40%, #302c24 0, #191713 48%, #12110f 100%); user-select:none; -webkit-user-select:none; }
+.app-shell ::selection { color:inherit; background:transparent; }
+.library, .queue { padding: clamp(22px, 2.6vw, 34px) clamp(18px, 2vw, 28px); background: rgba(12, 12, 10, .58); border-color: rgba(255,255,255,.09); }
+.library { border-right: 1px solid rgba(255,255,255,.09); overflow-y: auto; }
+.queue { border-left: 1px solid rgba(255,255,255,.09); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.brand { margin-bottom:64px; display:flex; align-items:center; gap:8px; }.brand-name { display:block; font-size:17px; font-weight:700; letter-spacing:.19em; line-height:1; }.brand small { display:block; margin-top:5px; color:#8e897f; font:8px 'DM Mono'; letter-spacing:.08em; text-transform:lowercase; white-space:nowrap; }.brand-dot { width:10px; height:10px; display:inline-block; flex:0 0 auto; background:var(--accent); border-radius:50%; box-shadow:0 0 13px var(--accent); }
+.eyebrow { color: #9a958a; margin: 0 0 10px; font: 10px 'DM Mono', monospace; letter-spacing: .15em; }
+.library-action { width: 100%; text-align: left; padding: 12px 0; background: transparent; border: 0; border-bottom: 1px solid #3d3a32; font-size: 14px; transition: color .2s; }.library-action:hover { color: var(--accent); }
+.library-hint { color: #77736a; font-size: 12px; line-height: 1.65; margin-top: 26px; }.colour-setting, .crossfade-setting { margin-top:26px; padding-top:18px; border-top:1px solid #3d3a32; }.crossfade-setting { margin-top:42px; }.colour-setting > div:not(.colour-swatches), .crossfade-setting > div { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; }.colour-setting strong, .crossfade-setting strong { color:var(--accent); font:11px 'DM Mono'; }.crossfade-setting input { width:100%; }.crossfade-setting small { display:block; margin-top:9px; color:#77736a; font-size:11px; }
+.colour-swatches { display:grid !important; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px; margin:0 !important; }.colour-swatches button { width:100%; aspect-ratio:1; border:1px solid rgba(255,255,255,.18); border-radius:50%; background:var(--swatch); box-shadow:inset 0 1px 1px rgba(255,255,255,.45), 0 2px 5px rgba(0,0,0,.34); transition:transform .16s, box-shadow .16s; }.colour-swatches button:hover { transform:translateY(-1px) scale(1.08); }.colour-swatches button.active { border-color:#fff; box-shadow:0 0 0 2px var(--accent), inset 0 1px 1px rgba(255,255,255,.5), 0 2px 5px rgba(0,0,0,.34); }
+.vinyl-setting { margin-top:26px; padding-top:18px; border-top:1px solid #3d3a32; }.vinyl-setting > div { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; }.vinyl-setting strong { color:var(--accent); font:11px 'DM Mono'; }.vinyl-setting input { width:100%; }.vinyl-setting small { display:block; margin-top:9px; color:#77736a; font-size:11px; }
+.crackle-setting { margin-top:26px; padding-top:18px; border-top:1px solid #3d3a32; }.crackle-setting > div { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; }.crackle-setting strong { color:var(--accent); font:11px 'DM Mono'; }.crackle-setting input { width:100%; }.crackle-setting small { display:block; margin-top:9px; color:#77736a; font-size:11px; }
+.reset-button { width:100%; margin:26px 0 8px; min-height:36px; border:1px solid #685545; border-radius:3px; color:var(--accent); background:rgba(35,27,20,.72); font:11px 'DM Mono'; letter-spacing:.13em; transition:color .16s, border-color .16s, background .16s; }.reset-button:hover { color:#21140d; border-color:var(--accent); background:var(--accent); }
+.lofi-setting { margin-top:26px; padding-top:18px; border-top:1px solid #3d3a32; }.lofi-setting > div { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; }.lofi-setting strong { color:var(--accent); font:11px 'DM Mono'; }.lofi-setting input { width:100%; }.lofi-setting small { display:block; margin-top:9px; color:#77736a; font-size:11px; }
+.rpm-setting { margin-top:26px; padding-top:18px; border-top:1px solid #3d3a32; }.rpm-setting > div { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; }.rpm-setting strong { color:var(--accent); font:11px 'DM Mono'; }.rpm-setting input { width:100%; }.rpm-setting small { display:block; margin-top:9px; color:#77736a; font-size:11px; }.rpm-presets { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin:11px 0 0 !important; }.rpm-presets button { min-height:29px; border:1px solid #514b42; border-radius:3px; color:#c8c0b3; background:#1c1915; font:10px 'DM Mono'; letter-spacing:.03em; transition:color .16s, border-color .16s, background .16s; }.rpm-presets button:hover { color:#f7e5d2; border-color:var(--accent); }.rpm-presets button.active { color:#25140d; border-color:var(--accent); background:var(--accent); box-shadow:0 0 12px color-mix(in srgb, var(--accent) 28%, transparent); }
+.reverb-setting { margin-top:26px; padding-top:18px; border-top:1px solid #3d3a32; }.reverb-setting > div { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; }.reverb-setting strong { color:var(--accent); font:11px 'DM Mono'; }.reverb-setting input { width:100%; }.reverb-setting small { display:block; margin-top:9px; color:#77736a; font-size:11px; }
+.eq-setting { margin-top:26px; padding:18px 0 4px; border-top:1px solid #3d3a32; }.eq-setting select { width:100%; margin-bottom:16px; padding:8px 9px; border:1px solid #504b42; border-radius:3px; color:#eee4d6; background:#24221d; font:11px 'DM Mono'; }.eq-bands { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }.eq-bands label { display:flex; min-width:0; flex-direction:column; align-items:center; gap:7px; color:#898378; font:9px 'DM Mono'; }.eq-bands input { width:68px; height:4px; transform:rotate(-90deg); margin:31px -26px 28px; }.eq-bands span { white-space:nowrap; }
+.turntable-panel { padding: 34px 6vw 25px; display: flex; align-items: center; flex-direction: column; justify-content: space-between; min-height: 0; position:relative; isolation:isolate; overflow:hidden; background:
+  radial-gradient(ellipse at 50% 46%, transparent 35%, rgba(0,0,0,.18) 76%, rgba(0,0,0,.46) 100%),
+  linear-gradient(90deg, rgba(4,3,2,.18), transparent 17% 83%, rgba(4,3,2,.2)),
+  url('./assets/angled-walnut-tabletop-v2.png') center center / cover no-repeat; }
+.turntable-panel::before, .turntable-panel::after { display:none; }
+.now-playing { width: 100%; text-align: center; min-height: 88px; }.now-playing h1 { max-width: 670px; margin: 0 auto; font: 600 clamp(22px, 1.9vw, 30px) 'Playfair Display', serif; line-height: 1.14; text-wrap: balance; }.now-playing > p:last-child { color: #9a958a; margin: 8px; font-size: 13px; }
+.turntable { width: min(44vw, 480px); aspect-ratio: 1; padding: 7%; }.plinth { width: 100%; height: 100%; background: linear-gradient(135deg, #d8bb91, #8c704e 49%, #c89f6d); border-radius: 9px; box-shadow: 22px 27px 39px rgba(0,0,0,.38), inset 0 0 0 4px rgba(64,39,20,.14), inset 0 0 35px rgba(255,255,255,.12); position: relative; overflow: hidden; }.plinth::before { content:''; position:absolute; inset:0; opacity:.16; background: repeating-linear-gradient(96deg, transparent 0 4px, #4a2d19 5px, transparent 7px 13px); mix-blend-mode:multiply; }
+.platter { position:absolute; width: 77%; aspect-ratio:1; left: 7%; top: 12%; border-radius:50%; padding: 2.5%; background: radial-gradient(circle at 42% 36%, #5d5a53, #24231f 64%, #0e0e0d 68%, #5c574f 70%, #201e1b 75%); box-shadow: 8px 13px 16px rgba(0,0,0,.4), inset 2px 3px 6px rgba(255,255,255,.12); }.record { width: 100%; height: 100%; background: repeating-radial-gradient(circle, #111110 0 1px, #242320 1.8px 2.7px, #121211 3.4px 4px); border-radius: 50%; box-shadow: 3px 5px 7px rgba(0,0,0,.55); position: relative; cursor: grab; touch-action: none; user-select: none; transform: rotate(var(--record-rotation, 0deg)); }.record::before { content:''; position:absolute; inset:7%; border:1px solid rgba(255,255,255,.11); border-radius:50%; }.record-sheen { position:absolute; inset:2%; border-radius:50%; background: conic-gradient(from 70deg, transparent 0 12%, rgba(255,255,255,.14) 18%, transparent 25% 49%, rgba(255,255,255,.06) 54%, transparent 60%); }.label { position: absolute; inset: 31%; z-index: 1; display:flex; flex-direction: column; justify-content:center; align-items:center; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #ef9265, #c85431 73%); color:#32130c; text-align:center; padding: 10px; overflow:hidden; box-shadow: inset 0 0 0 1px rgba(59,19,9,.3); }.label::before { content:''; position:absolute; inset:9%; border-radius:50%; border: 1px solid rgba(55,15,7,.35); }.label span { z-index:1; font: 700 8px 'DM Mono'; letter-spacing: .08em; text-transform: uppercase; }.label small { z-index:1; margin-top: 5px; font: 7px 'DM Mono'; }.label i { position:absolute; width: 10px; aspect-ratio:1; border-radius:50%; background:#2b1d16; box-shadow: inset 1px 1px 2px #0008; }.record.scratching { cursor: grabbing; }
+.tonearm { --arm-angle: -33deg; position:absolute; right: 8.2%; top: 14%; width: 40%; height: 55%; transform-origin: 100% 0; transform: rotate(var(--arm-angle)); transition: transform .95s cubic-bezier(.2,.8,.2,1); z-index:3; }.tonearm-base { position:absolute; right: 0; top:0; width: 39px; aspect-ratio:1; border-radius:50%; background: radial-gradient(circle at 35% 30%, #dfd9ce 0 8%, #807d76 10% 25%, #2c2c2a 28% 51%, #aaa59c 53% 58%, #393936 60%); box-shadow: 3px 5px 7px #1c130d77; }.tonearm-base i { position:absolute; width: 8px; aspect-ratio:1; border-radius:50%; left:15px; top:15px; background:#181817; }.arm-tube { position:absolute; right: 18px; top: 16px; width: 116%; height: 11px; border-radius: 12px 4px 4px 12px; transform-origin:right center; transform: rotate(-70deg); background: linear-gradient(#edebe4 0%, #aaa69f 42%, #66645f 47%, #c9c6bd 74%, #77756f 100%); box-shadow: 2px 4px 4px #1a171377; }.counterweight { position:absolute; width: 25px; height: 22px; right:-8px; top:-5px; border-radius: 45% 50% 50% 45%; background: linear-gradient(90deg,#262624,#6c6961 48%,#292927); box-shadow: 1px 2px 3px #0007; }.headshell { position:absolute; width: 28px; height:17px; left:-9px; top:-3px; border-radius: 3px 8px 4px 3px; background: linear-gradient(145deg,#393936,#0f0f0e); box-shadow: 1px 2px 3px #0008; }.headshell::before { content:''; position:absolute; width:11px; height:3px; left:5px; top:5px; background:#a5a198; border-radius:2px; }.headshell i { position:absolute; width:2px; height:13px; left:7px; top:14px; background:#e5d6c2; transform:rotate(11deg); transform-origin:top; }.power-light { position:absolute; right:8%; bottom:9%; width:18px; aspect-ratio:1; border-radius:50%; background:#6f6558; box-shadow: inset 1px 2px 3px #0008; }.power-light i { position:absolute; width:7px; height:7px; left:5.5px; top:5.5px; border-radius:50%; background:var(--accent); box-shadow: 0 0 9px var(--accent); }
+.controls { display:flex; align-items:center; gap:8px; }.controls button { width:58px; height:36px; border:1px solid rgba(239,226,207,.62); border-radius:4px; background:rgba(19,16,12,.52); font-size:18px; line-height:1; opacity:1; transition:color .18s, background .18s, border-color .18s; }.controls button:hover { color:#201d18; border-color:var(--accent); background:var(--accent); }.controls .play-button { width:58px; height:36px; aspect-ratio:auto; border-radius:4px; font-size:16px; padding:0; }.controls .play-button:hover { background:var(--accent); color:#201d18; }
+.scrubber, .volume { width: min(530px, 100%); display:grid; align-items:center; gap:12px; font:10px 'DM Mono'; color:#999388; }.scrubber { grid-template-columns: 32px 1fr 32px; }.volume { grid-template-columns: 28px 1fr; margin-top: 0; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.09); } input[type=range] { accent-color: var(--accent); height: 4px; }
+.queue-header { display:flex; align-items:flex-end; justify-content:space-between; border-bottom:1px solid #3d3a32; padding-bottom:18px; flex: 0 0 auto; }.queue h2 { margin:0; font: 600 25px 'Playfair Display'; }.queue-header > span { color:#9a958a; font: 10px 'DM Mono'; }.track-list { flex: 1 1 auto; min-height: 0; overflow-y:auto; overflow-x:hidden; margin:12px -8px; padding: 0 8px; }.track { width:100%; display:grid; grid-template-columns: 25px 1fr 12px; text-align:left; align-items:center; padding:13px 0; gap:8px; background:transparent; border:0; border-bottom:1px solid #2d2b26; color:#c8c2b7; }.track span { font:10px 'DM Mono'; color:#77736a; }.track strong { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:13px; font-weight:500; }.track i { color:var(--accent); font-size:9px; }.track.active strong { color:#f5e6d2; }.track:hover strong { color:var(--accent); }.empty-queue { color:#77736a; font-size:13px; line-height:1.6; padding:14px 0; }.queue-helper { margin:18px 0 8px; padding:16px 0 4px; border-top:1px solid #3d3a32; color:#77736a; font-size:12px; line-height:1.65; }
+@media (max-width: 1100px) { .app-shell { grid-template-columns: 210px minmax(0, 1fr); }.queue { display:none; }.library { padding:26px 18px; }.turntable-panel { padding-left:3vw; padding-right:3vw; } }
+
+/* Turntable depth: the player remains CSS-native, but its layers sit in a
+   shared perspective space so it reads as a physical object rather than a flat illustration. */
+.turntable {
+  position: relative;
+  isolation: isolate;
+  perspective: 1200px;
+  perspective-origin: 50% 16%;
+  transform-style: preserve-3d;
+}
+.turntable::before {
+  content: '';
+  position: absolute;
+  inset: 39% -1% -20%;
+  z-index: -2;
+  border-radius: 48%;
+  background: radial-gradient(ellipse, rgba(0,0,0,.64) 0, rgba(0,0,0,.3) 43%, transparent 72%);
+  filter: blur(13px);
+  transform: translateZ(-98px) rotateX(66deg);
+  pointer-events: none;
+}
+.plinth {
+  isolation: isolate;
+  overflow: visible;
+  transform: rotateX(58deg) scale(1.03);
+  transform-origin: 50% 62%;
+  transform-style: preserve-3d;
+  background:
+    radial-gradient(circle at 32% 22%, rgba(255,239,194,.34), transparent 30%),
+    linear-gradient(135deg, #d8bb91, #8c704e 49%, #c89f6d);
+  box-shadow: 23px 33px 40px rgba(0,0,0,.42), inset 0 0 0 4px rgba(64,39,20,.14), inset 0 0 35px rgba(255,255,255,.12);
+}
+.plinth::before { border-radius: inherit; z-index: 0; }
+.plinth::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 36px;
+  z-index: 4;
+  border-radius: 0 0 8px 8px;
+  background:
+    linear-gradient(90deg, rgba(43,24,11,.45), transparent 18% 78%, rgba(43,24,11,.35)),
+    repeating-linear-gradient(96deg, #4b2d19 0 2px, #704728 3px 7px, #3c2517 8px 10px);
+  box-shadow: 0 15px 5px rgba(0,0,0,.36), inset 0 -3px 5px rgba(0,0,0,.42);
+  transform: rotateX(90deg);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+.platter {
+  z-index: 1;
+  transform: translateZ(19px);
+  transform-style: preserve-3d;
+  box-shadow: 10px 17px 19px rgba(0,0,0,.45), inset 2px 3px 6px rgba(255,255,255,.12);
+}
+.record {
+  transform: translateZ(7px) rotate(var(--record-rotation, 0deg));
+  transform-style: preserve-3d;
+  box-shadow: 4px 8px 9px rgba(0,0,0,.62), inset 0 1px 1px rgba(255,255,255,.12);
+  will-change: transform;
+}
+.record::before { transform: translateZ(1px); }
+.record-sheen { transform: translateZ(2px); mix-blend-mode: screen; opacity: .86; }
+.label { transform: translateZ(4px); box-shadow: inset 0 0 0 1px rgba(59,19,9,.3), 0 2px 3px rgba(0,0,0,.24); }
+.tonearm { transform: translateZ(43px) rotate(var(--arm-angle)); will-change: transform; }
+.tonearm-base, .arm-tube, .power-light { transform-style: preserve-3d; }
+.tonearm-base { box-shadow: 4px 7px 9px #1c130d91, inset 0 1px 1px rgba(255,255,255,.38); }
+.power-light { transform: translateZ(31px); box-shadow: inset 1px 2px 3px #0008, 0 4px 5px rgba(0,0,0,.32); }
+
+/* The GLB model now supplies the physical plinth, platter and tonearm. */
+.three-turntable {
+  width:min(100%, 52vw, calc(88vh - 150px), 1050px);
+  /* R3F's canvas is 100% tall. A concrete wrapper height keeps its intrinsic
+     size from stretching the flex layout on short windows. */
+  height:min(46.4vw, calc(78.57vh - 134px), 938px);
+  aspect-ratio:auto;
+  padding:0;
+  perspective:none;
+  transform-style:flat;
+  overflow:visible;
+}
+.three-turntable::before { inset:46% -4% -7%; z-index:-1; transform:none; filter:blur(18px); }
+.turntable-canvas { display:block; width:100% !important; height:100% !important; border-radius:18px; background:transparent; }
+.model-scratch-surface { position:absolute; z-index:2; inset:0; clip-path:polygon(7% 13%, 91% 13%, 96% 78%, 4% 78%); cursor:grab; touch-action:none; user-select:none; }
+.model-scratch-surface.scratching { cursor:grabbing; }
+.turntable-hardware { position:absolute; z-index:4; inset:0; pointer-events:none; }
+.deck-button, .deck-pitch { position:absolute; pointer-events:auto; }
+.deck-button { appearance:none; padding:0; border:1px solid transparent; border-radius:3px; background:transparent; }
+.deck-button:focus-visible, .deck-pitch:focus-visible { outline:2px solid #b6eaff; outline-offset:3px; }
+.deck-play { left:6.4%; top:66.5%; width:8.6%; height:6.4%; transform:skewX(-11deg); transform-origin:center; }
+.deck-play::after { content:''; position:absolute; left:50%; top:49%; width:18%; height:13%; border-radius:1px; opacity:0; transform:translate(-50%, -50%); transition:opacity .16s, box-shadow .16s; pointer-events:none; }
+.deck-play.is-playing::after { opacity:1; background:#b6eaff; box-shadow:0 0 5px #b6eaff, 0 0 10px rgba(128,220,255,.72); }
+.deck-play.is-paused::after { animation:deck-pause-led 1s steps(2, end) infinite; }
+@keyframes deck-pause-led { 0%, 49% { opacity:1; background:#b6eaff; box-shadow:0 0 5px #b6eaff, 0 0 10px rgba(128,220,255,.72); } 50%, 100% { opacity:.08; box-shadow:none; } }
+.deck-speed { top:68.4%; width:4.3%; height:3.4%; transform:skewX(-11deg); transform-origin:center; }
+.deck-speed-16 { left:16%; }
+.deck-speed-45 { left:21%; }
+.deck-speed::after { content:''; position:absolute; left:50%; top:99%; width:30%; height:18%; border-radius:50%; opacity:0; transform:translate(-50%, -50%) skewX(11deg); transition:opacity .16s, box-shadow .16s; pointer-events:none; }
+.deck-speed-16::after { background:#ffe47b; box-shadow:0 0 4px #ffe47b, 0 0 7px rgba(255,214,79,.6); }
+.deck-speed-45::after { background:#ff9c56; box-shadow:0 0 4px #ff9c56, 0 0 7px rgba(255,119,52,.6); }
+.deck-speed.is-active::after { opacity:1; }
+.deck-pitch { right:4%; top:38%; width:13%; height:37%; border-radius:4px; cursor:ns-resize; touch-action:none; }
+
+/* Lower mixing desk ------------------------------------------------------ */
+.turntable-panel { padding:clamp(16px, 2vw, 25px) clamp(24px, 4vw, 92px) clamp(12px, 1.5vw, 18px); justify-content:flex-start; gap:clamp(6px, 1vw, 12px); overflow:hidden; }
+.now-playing { min-height:66px; flex:0 0 auto; }
+.three-turntable { flex:0 0 auto; margin-top:-60px; }
+.controls { flex:0 0 auto; margin:0; }
+.scrubber { position:relative; z-index:4; width:min(100%, clamp(530px, 45vw, 700px)); flex:0 0 auto; margin-top:-25px; }
+.pitch-setting { margin-top:26px; padding-top:18px; border-top:1px solid #3d3a32; }
+.pitch-setting > div { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; }
+.pitch-setting strong { color:var(--accent); font:11px 'DM Mono'; }
+.pitch-setting input { width:100%; }
+.pitch-setting small { display:block; margin-top:9px; color:#77736a; font-size:11px; }
+.mixer-rack { position:relative; z-index:4; width:min(100%, clamp(530px, 45vw, 700px)); display:grid; grid-template-columns:clamp(210px, 18vw, 250px) minmax(0, 1fr); gap:clamp(14px, 1.4vw, 20px); align-items:start; margin-top:14px; padding:14px 0 2px; border-top:1px solid rgba(255,255,255,.1); flex:0 0 auto; }
+.mixer-left { display:grid; align-content:start; gap:12px; min-width:0; }
+.mixer-left .controls { width:100%; justify-content:space-between; }
+.knob-strip { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.knob-control { width:62px; display:grid; justify-items:center; gap:4px; color:#cbc2b4; font-size:10px; text-align:center; }
+.knob-control > span { white-space:nowrap; font-size:10px; }
+.knob { --knob-angle:0deg; width:54px; height:54px; position:relative; border:1px solid #8e8475; border-radius:50%; background: radial-gradient(circle at 36% 30%, #4f4a42 0 8%, #262421 42%, #11100f 70%), repeating-conic-gradient(from -135deg, rgba(239,226,207,.55) 0 2deg, transparent 2deg 30deg); box-shadow: inset 2px 2px 5px #6f675b55, inset -3px -4px 8px #000c, 0 4px 8px #0008; touch-action:none; }
+.knob:hover { border-color:var(--accent); }
+.knob:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.knob i { position:absolute; left:calc(50% - 1px); top:5px; width:2px; height:20px; border-radius:4px; background:var(--accent); box-shadow:0 0 5px var(--accent); transform-origin:1px 22px; transform:rotate(var(--knob-angle)); }
+.knob b { position:absolute; inset:0; display:grid; place-items:center; padding-top:11px; color:#f5e7d6; font:10px 'DM Mono'; pointer-events:none; }
+.mixer-eq { margin:0; padding:0 0 0 18px; border-top:0; border-left:1px solid rgba(255,255,255,.1); min-width:0; }
+.mixer-eq .eyebrow { margin-bottom:7px; }
+.mixer-eq select { margin-bottom:10px; padding:5px 7px; }
+.mixer-eq .eq-bands { gap:4px; }
+.mixer-eq .eq-bands label { gap:5px; }
+.mixer-eq .eq-bands input { width:108px; margin:52px -52px 47px; }
+.mixer-eq .eq-bands output { min-height:10px; color:var(--accent); font:8px 'DM Mono'; line-height:1; white-space:nowrap; }
+@media (max-height: 820px) {
+  .turntable-panel { gap:4px; padding:8px 4vw; }
+  .mixer-rack { padding-top:2px; }
+  .controls { gap:13px; }
+  .mixer-left .controls button { width:52px; height:34px; }
+  .now-playing > p:last-child { margin:4px; }
+}

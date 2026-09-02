@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# Personal music libraries are loaded at runtime and are not application assets.
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.m4a
+*.aac
