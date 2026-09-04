@@ -1,112 +1,155 @@
-# VIVI — Virtual Vinyl
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mateomustapic3/VIVI/main/build/icon.png" width="112" alt="VIVI icon">
+</p>
 
-VIVI is a desktop music player that turns a local music library into a tactile virtual turntable. It pairs a high-detail 3D deck with a playable vinyl interface: cue a song with the tonearm, scratch the record, adjust the physical controls and shape the sound in real time.
+<h1 align="center">VIVI — Virtual Vinyl</h1>
 
-VIVI plays **local audio files only**. Your music stays on your computer; the app does not upload, convert or stream your library.
+<p align="center">
+  A tactile desktop music player that turns your local music library into a playable virtual turntable.
+</p>
 
-<img width="1280" height="803" alt="image" src="https://github.com/user-attachments/assets/7851185b-fae7-4382-b74a-94fe335fa253" />
+<p align="center">
+  <a href="https://github.com/mateomustapic3/VIVI/releases/latest">Download latest release</a>
+  ·
+  <a href="#features">Features</a>
+  ·
+  <a href="#controls">Controls</a>
+  ·
+  <a href="#development">Development</a>
+</p>
 
+![VIVI turntable interface](https://github.com/user-attachments/assets/7851185b-fae7-4382-b74a-94fe335fa253)
 
-## Highlights
+## About
 
-- High-detail interactive 3D turntable with animated platter, record label, tonearm and hardware LEDs.
-- Add individual files or scan a whole folder recursively. Supported formats: MP3, WAV, FLAC, OGG, M4A and AAC.
-- Queue management: select tracks, drag to reorder them, or remove tracks you no longer want.
-- Play, pause, previous/next, timeline seeking and hold-to-scan previous/next controls.
-- Direct tonearm control: drag the stylus onto the record to cue by groove position; move it away to stop.
-- Left-side vinyl scratching with inertia. Scratch audio is enabled only while the stylus is on the record.
-- 16 / 33 / 45 RPM modes with a physical motor acceleration and deceleration ramp.
-- Pitch adjustment from −8 to +8 semitones, linked to both the UI control and deck pitch fader.
-- Dual volume controls, reverb and a seven-band equalizer with presets.
-- Crossfade, warmth, configurable crackle and Lo-Fi vinyl-age processing with severe wear wobble near the maximum setting.
-- Accent colour options, adaptive record-label colouring and selectable surfaces: dark wood, light wood, black wood, metal, concrete, leaves, black, or a custom image.
-- Adaptive contrast for bright backgrounds: centre-panel copy automatically switches to a darker palette while dark surfaces retain the original appearance.
-- Responsive layout and demand-driven 3D rendering that reduces unnecessary CPU/GPU work while the deck is idle.
-- One-click reset for every audio, appearance and turntable setting.
+VIVI is a local-first desktop music player built around a detailed interactive 3D turntable. Load songs from your computer, place the needle on the record, scratch the platter, shape the sound and organise your listening queue.
 
-## Install
+Your music remains on your device. VIVI does not upload, stream, convert or analyse your library online.
 
-Download the appropriate installer from the GitHub release assets.
+## Download
 
-| Platform | File | Notes |
-| --- | --- | --- |
-| macOS (Apple Silicon) | `VIVI-<version>-mac-arm64.dmg` | Open the DMG and drag VIVI to Applications. |
-| macOS (Intel) | `VIVI-<version>-mac-x64.dmg` | Open the DMG and drag VIVI to Applications. |
-| Windows 10/11 (64-bit) | `VIVI-<version>-win-x64.exe` | Run the installer and choose an installation folder if desired. |
+Download the installer that matches your computer:
 
-End users **do not need Node.js, npm or `npm run dev`**. After installation, they open VIVI like any other desktop application from Applications, Start, Desktop, or the installed shortcut.
+| Platform | Download |
+| --- | --- |
+| macOS — Apple Silicon (M1, M2, M3, M4…) | [VIVI Apple Silicon](https://github.com/mateomustapic3/VIVI/releases/latest) |
+| macOS — Intel | [VIVI Intel Mac](https://github.com/mateomustapic3/VIVI/releases/latest) |
+| Windows 10 / 11 — 64-bit | [VIVI for Windows](https://github.com/mateomustapic3/VIVI/releases/latest) |
 
-The macOS builds are unsigned. If macOS blocks the first launch, open the app with Control-click → **Open**, then confirm once in the system dialog.
+> Apple Silicon MacBooks must use the installer labelled **Apple Silicon**. Do not use the Intel version on an M-series Mac.
 
-## Development only
+After installation, VIVI opens like any other desktop app. You do not need Node.js, npm, Terminal or `npm run dev`.
 
-The following commands are for contributors working from the source code. They are not required to use an installed VIVI release.
+### macOS first launch
 
-### Requirements
+The macOS build is not yet Apple-notarized. If macOS displays a security warning on the first launch:
 
-- Node.js 20 or newer (current LTS recommended)
-- npm
+1. Open the **Applications** folder.
+2. Control-click VIVI.
+3. Select **Open**.
+4. Confirm **Open** once more.
 
-### Development
+## Features
 
-```bash
-npm install
-npm run dev
-```
+### Interactive turntable
 
-### Production build
+- High-detail 3D turntable with animated platter, record label, tonearm, pitch fader and hardware LEDs.
+- Drag the tonearm across the record to cue a song by groove position.
+- Move the needle off the record to stop playback naturally.
+- Scratch the left side of the platter with realistic inertia.
+- Scratch audio plays only while the stylus is on the record.
+- 16, 33 and 45 RPM modes with motor-style acceleration and deceleration.
+- Pitch adjustment from −8 to +8 semitones, linked to both the sidebar control and physical deck fader.
 
-```bash
-npm run build
-```
+### Music library and queue
 
-### Desktop installers
+- Add individual files or recursively scan an entire music folder.
+- Supports MP3, WAV, FLAC, OGG, M4A and AAC.
+- Select a track from the queue to load and play it.
+- Drag queue entries to reorder songs.
+- Remove individual tracks from the queue at any time.
+- Previous, next, play, pause, timeline seeking and hold-to-scan controls.
 
-```bash
-# Native macOS DMG and ZIP
-npm run dist:mac
+### Sound shaping
 
-# Windows NSIS installer (run on Windows, or use the GitHub Actions workflow)
-npm run dist:win
-```
+- Separate music volume and master volume controls.
+- Reverb control and seven-band equalizer with presets.
+- Adjustable crossfade between consecutive songs.
+- Warmth control for vinyl-style saturation and surface character.
+- Crackle control for vinyl pops and record texture.
+- Lo-Fi intensity control for simulated vinyl age, tonal wear, wow and flutter at high values.
+- Reset button to restore every setting to its default state.
 
-Generated installers are written to `release/` and are intentionally excluded from version control. The repository includes a GitHub Actions workflow that creates both macOS and Windows installers when a version tag is pushed.
+### Appearance
+
+- Accent colours: orange, pink, green, blue, yellow, red, purple and white.
+- Accent colour also updates the loaded record label.
+- Built-in backgrounds: dark walnut, light oak, black wood, gunmetal, concrete, leaves and full black.
+- Custom background image support.
+- Automatic contrast adjustment for bright backgrounds.
+- Responsive layout for different screen sizes.
 
 ## Controls
 
 | Area | Action |
 | --- | --- |
-| Record, left side | Drag to scratch. |
-| Tonearm/stylus | Drag across the playable record area to cue. Drag off the record to stop and return to rest. |
-| Deck play button | Starts and pauses the loaded song; its LED is active only when a track is loaded. |
-| 16 / 45 deck buttons | Toggle the matching RPM preset. Selecting again returns the deck to 33 RPM. |
+| Record — left side | Drag to scratch the platter. |
+| Tonearm / stylus | Drag across the playable record area to cue. Drag off the record to stop. |
+| Deck play button | Start or pause the loaded song. |
+| 16 / 45 deck buttons | Activate 16 or 45 RPM. Click the active speed again to return to 33 RPM. |
 | Deck pitch fader | Drag vertically to set pitch from −8 to +8 semitones. |
-| Transport controls | Click for previous/next; hold previous or next to scan through the song. |
-| Queue | Drag a row to reorder it; click × to remove it. |
+| Timeline | Click or drag to seek through the current song. |
+| Previous / next | Click to change track. Hold to scan backward or forward through the song. |
+| Queue | Drag rows to reorder them, or click × to remove a track. |
 
-## Audio and privacy
+## Privacy
 
-VIVI opens only the files and folders you explicitly select. Audio is streamed through Electron's local `media://` protocol and is processed locally with the Web Audio API. No user audio, playlist data or custom background image leaves the device.
+VIVI accesses only files and folders that you explicitly select.
 
-## Project structure
+Audio playback, queue data, sound processing and custom backgrounds stay on your computer. The application uses Electron's local `media://` protocol and the Web Audio API; no music files or personal data are sent to a server.
 
-```text
-src/main.tsx             React application, player state and Web Audio controls
-src/TurntableScene.tsx   Three.js turntable scene, labels and deck interaction
-src/styles.css           Interface, responsive layout and themes
-src/assets/              Model and built-in background assets
-electron/main.cjs        Electron window, file pickers and local media protocol
-electron/preload.cjs     Restricted bridge exposed to the renderer
-.github/workflows/       Cross-platform release builds
+## Development
+
+These instructions are only for contributors building VIVI from source.
+
+### Requirements
+
+- Node.js 20 or newer
+- npm
+
+### Run locally
+
+```bash
+npm install
+npm run dev
+
+Production build
+npm run build
+Build desktop installers
+# macOS DMG and ZIP
+npm run dist:mac
+
+# Windows NSIS installer
+npm run dist:win
+Generated installers are written to release/ and are excluded from version control.
+Project structure
+src/main.tsx             Player state, audio engine and interface controls
+src/TurntableScene.tsx   Three.js turntable scene and deck interaction
+src/styles.css           Layout, themes and responsive styling
+src/assets/              3D model, backgrounds and preview assets
+electron/main.cjs        Electron window, file pickers and media protocol
+electron/preload.cjs     Restricted renderer bridge
+build/                   Application icons for macOS and Windows
+.github/workflows/       Automated cross-platform release builds
+Releasing a new version
+1. Update the version in package.json.
+2. Update package-lock.json.
+3. Commit the changes.
+4. Create a matching version tag, for example:
+git tag -a v1.2.3 -m "VIVI 1.2.3"
+git push origin main
+git push origin v1.2.3
+5. GitHub Actions builds and publishes installers for Apple Silicon, Intel Mac and Windows.
+License
+This project is currently intended for personal use. Add a licence file before redistributing or accepting external contributions.
 ```
-
-## Releasing a new version
-
-1. Update the `version` field in `package.json`.
-2. Commit the version change and create a matching Git tag, for example `v1.2.0`.
-3. Push the tag to GitHub.
-4. The release workflow builds macOS and Windows installers and attaches them to a GitHub Release.
-
-## License
-
-This project is for personal use unless a separate licence is added.
