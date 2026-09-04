@@ -4,7 +4,8 @@ VIVI is a desktop music player that turns a local music library into a tactile v
 
 VIVI plays **local audio files only**. Your music stays on your computer; the app does not upload, convert or stream your library.
 
-![VIVI turntable interface](src/assets/angled-walnut-tabletop-v2.png)
+<img width="1280" height="803" alt="image" src="https://github.com/user-attachments/assets/7851185b-fae7-4382-b74a-94fe335fa253" />
+
 
 ## Highlights
 
