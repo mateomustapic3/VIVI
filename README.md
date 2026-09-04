@@ -1,3 +1,6 @@
+Naravno — kopiraj cijeli sadržaj ispod direktno u `README.md`:
+
+````md
 <p align="center">
   <img src="https://raw.githubusercontent.com/mateomustapic3/VIVI/main/build/icon.png" width="112" alt="VIVI icon">
 </p>
@@ -28,13 +31,13 @@ Your music remains on your device. VIVI does not upload, stream, convert or anal
 
 ## Download
 
-Download the installer that matches your computer:
+Download the installer that matches your computer from the [latest release](https://github.com/mateomustapic3/VIVI/releases/latest).
 
-| Platform | Download |
-| --- | --- |
-| macOS — Apple Silicon (M1, M2, M3, M4…) | [VIVI Apple Silicon](https://github.com/mateomustapic3/VIVI/releases/latest) |
-| macOS — Intel | [VIVI Intel Mac](https://github.com/mateomustapic3/VIVI/releases/latest) |
-| Windows 10 / 11 — 64-bit | [VIVI for Windows](https://github.com/mateomustapic3/VIVI/releases/latest) |
+| Platform | Installer | Notes |
+| --- | --- | --- |
+| macOS — Apple Silicon | `VIVI-<version>-mac-Apple-Silicon.dmg` | For M1, M2, M3, M4 and newer Macs. |
+| macOS — Intel | `VIVI-<version>-mac-Intel.dmg` | For Intel-based Macs only. |
+| Windows 10 / 11 — 64-bit | `VIVI-<version>-Windows-x64.exe` | Standard Windows installer. |
 
 > Apple Silicon MacBooks must use the installer labelled **Apple Silicon**. Do not use the Intel version on an M-series Mac.
 
@@ -122,17 +125,31 @@ These instructions are only for contributors building VIVI from source.
 ```bash
 npm install
 npm run dev
+```
 
-Production build
+### Production build
+
+```bash
 npm run build
-Build desktop installers
+```
+
+The production-ready web files are generated in the `dist/` directory.
+
+### Build desktop installers
+
+```bash
 # macOS DMG and ZIP
 npm run dist:mac
 
 # Windows NSIS installer
 npm run dist:win
-Generated installers are written to release/ and are excluded from version control.
-Project structure
+```
+
+Generated installers are written to `release/` and are excluded from version control.
+
+## Project structure
+
+```text
 src/main.tsx             Player state, audio engine and interface controls
 src/TurntableScene.tsx   Three.js turntable scene and deck interaction
 src/styles.css           Layout, themes and responsive styling
@@ -141,15 +158,40 @@ electron/main.cjs        Electron window, file pickers and media protocol
 electron/preload.cjs     Restricted renderer bridge
 build/                   Application icons for macOS and Windows
 .github/workflows/       Automated cross-platform release builds
-Releasing a new version
-1. Update the version in package.json.
-2. Update package-lock.json.
-3. Commit the changes.
-4. Create a matching version tag, for example:
+```
+
+## Releasing a new version
+
+1. Update the version in `package.json`.
+2. Update `package-lock.json`.
+
+```bash
+npm install --package-lock-only --ignore-scripts
+```
+
+3. Test the production build.
+
+```bash
+npm run build
+```
+
+4. Commit the version change and create a matching Git tag.
+
+```bash
+git add .
+git commit -m "Release VIVI 1.2.3"
 git tag -a v1.2.3 -m "VIVI 1.2.3"
 git push origin main
 git push origin v1.2.3
-5. GitHub Actions builds and publishes installers for Apple Silicon, Intel Mac and Windows.
-License
-This project is currently intended for personal use. Add a licence file before redistributing or accepting external contributions.
 ```
+
+5. GitHub Actions automatically builds and publishes installers for:
+
+   - macOS Apple Silicon
+   - macOS Intel
+   - Windows 64-bit
+
+## License
+
+This project is currently intended for personal use. Add a licence file before redistributing or accepting external contributions.
+````
