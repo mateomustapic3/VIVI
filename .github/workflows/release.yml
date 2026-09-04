@@ -19,7 +19,7 @@ jobs:
           - platform: macOS
             runner: macos-15
             command: npm run dist:mac -- --arm64 --publish never
-            artifact: macOS-ARM64-installer
+            artifact: macOS-Apple-Silicon-installer
           - platform: macOS Intel
             runner: macos-15-intel
             command: npm run dist:mac -- --x64 --publish never
@@ -60,9 +60,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          mapfile -d '' release_assets < <(
-            find installers -maxdepth 1 -type f \( -name 'VIVI-*-mac-*.dmg' -o -name 'VIVI-*-win-*.exe' \) -print0
-          )
+          mkdir -p publish
+          release_assets=()
+          version="${GITHUB_REF_NAME#v}"
+          while IFS= read -r -d '' asset; do
+            case "$(basename "$asset")" in
+              VIVI-*-mac-arm64.dmg) filename="VIVI-${version}-mac-Apple-Silicon.dmg" ;;
+              VIVI-*-mac-x64.dmg) filename="VIVI-${version}-mac-Intel.dmg" ;;
+              VIVI-*-win-x64.exe) filename="VIVI-${version}-Windows-x64.exe" ;;
+              *) continue ;;
+            esac
+            target="publish/${filename}"
+            cp "$asset" "$target"
+            release_assets+=("$target")
+          done < <(find installers -maxdepth 1 -type f \( -name 'VIVI-*-mac-*.dmg' -o -name 'VIVI-*-win-*.exe' \) -print0)
           test "${#release_assets[@]}" -gt 0
           if ! gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" >/dev/null 2>&1; then
             gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
