@@ -64,14 +64,9 @@ jobs:
             find installers -maxdepth 1 -type f \( -name 'VIVI-*-mac-*.dmg' -o -name 'VIVI-*-win-*.exe' \) -print0
           )
           test "${#release_assets[@]}" -gt 0
-          if gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            while IFS= read -r asset; do
-              case "${asset}" in
-                VIVI-*-mac-arm64.dmg|VIVI-*-mac-x64.dmg|VIVI-*-win-x64.exe) ;;
-                *) gh release delete-asset "${GITHUB_REF_NAME}" "${asset}" --repo "${GITHUB_REPOSITORY}" --yes ;;
-              esac
-            done < <(gh release view "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name')
-            gh release upload "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --clobber "${release_assets[@]}"
-          else
-            gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --generate-notes "${release_assets[@]}"
+          if ! gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+              -f "tag_name=${GITHUB_REF_NAME}" \
+              -F "generate_release_notes=true"
           fi
+          gh release upload "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --clobber "${release_assets[@]}"
