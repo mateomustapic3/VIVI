@@ -32,7 +32,7 @@ Download the installer that matches your computer from the [latest release](http
 
 | Platform | Installer | Notes |
 | --- | --- | --- |
-| macOS — Apple Silicon | `VIVI-<version>-mac-Apple-Silicon.dmg` | For M1, M2, M3, M4 and newer Macs. |
+| macOS — Apple Silicon | [`VIVI-<version>-mac-Apple-Silicon.dmg`](https://github.com/mateomustapic3/VIVI/releases/download/v1.2.2/VIVI-1.2.2-mac-Apple-Silicon.dmg) | For M1, M2, M3, M4 and newer Macs. |
 | macOS — Intel | `VIVI-<version>-mac-Intel.dmg` | For Intel-based Macs only. |
 | Windows 10 / 11 — 64-bit | `VIVI-<version>-Windows-x64.exe` | Standard Windows installer. |
 
