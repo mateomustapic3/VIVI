@@ -18,8 +18,12 @@ jobs:
         include:
           - platform: macOS
             runner: macos-14
-            command: npm run dist:mac -- --arm64 --x64
-            artifact: macOS-installers
+            command: npm run dist:mac -- --arm64
+            artifact: macOS-ARM64-installer
+          - platform: macOS Intel
+            runner: macos-15-intel
+            command: npm run dist:mac -- --x64
+            artifact: macOS-Intel-installer
           - platform: Windows
             runner: windows-latest
             command: npm run dist:win
