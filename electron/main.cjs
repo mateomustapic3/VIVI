@@ -41,6 +41,7 @@ async function findAudioFiles(folder) {
 function createWindow() {
   const window = new BrowserWindow({
     title: 'VIVI - Virtual Vinyl',
+    icon: path.join(__dirname, '../build/icon.png'),
     width: 1280,
     height: 800,
     minWidth: 900,

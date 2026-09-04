@@ -27,6 +27,7 @@ coverage/
 .cache/
 .eslintcache
 *.tsbuildinfo
+build/icon.iconset/
 
 # Environment files and signing credentials
 .env

@@ -1,7 +1,7 @@
 {
   "name": "vivi-virtual-vinyl",
   "productName": "VIVI - Virtual Vinyl",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A high-detail virtual vinyl desktop player for local music libraries.",
   "author": "mateomustapic3",
   "private": true,
@@ -44,9 +44,11 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
+      "build/icon.png",
       "package.json"
     ],
     "mac": {
+      "icon": "build/icon.icns",
       "category": "public.app-category.music",
       "target": [
         "dmg",
@@ -54,6 +56,7 @@
       ]
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis"
       ]
