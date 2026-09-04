@@ -36,18 +36,6 @@ Download the installer that matches your computer from the [latest release](http
 | macOS — Intel | `VIVI-<version>-mac-Intel.dmg` | For Intel-based Macs only. |
 | Windows 10 / 11 — 64-bit | `VIVI-<version>-Windows-x64.exe` | Standard Windows installer. |
 
-> Apple Silicon MacBooks must use the installer labelled **Apple Silicon**. Do not use the Intel version on an M-series Mac.
-
-After installation, VIVI opens like any other desktop app. You do not need Node.js, npm, Terminal or `npm run dev`.
-
-### macOS first launch
-
-The macOS build is not yet Apple-notarized. If macOS displays a security warning on the first launch:
-
-1. Open the **Applications** folder.
-2. Control-click VIVI.
-3. Select **Open**.
-4. Confirm **Open** once more.
 
 ## Features
 
