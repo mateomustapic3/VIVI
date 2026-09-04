@@ -1,9 +1,45 @@
+# Dependencies, generated application files and desktop installers
 node_modules/
 dist/
-.DS_Store
-*.log
+release/
+out/
+*.asar
+*.dmg
+*.exe
+*.msi
+*.AppImage
+*.deb
 
-# Personal music libraries are loaded at runtime and are not application assets.
+# Logs, test output and tool caches
+*.log
+*.log.*
+coverage/
+.nyc_output/
+.vite/
+.cache/
+.eslintcache
+*.tsbuildinfo
+
+# Environment files and signing credentials
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.cer
+*.mobileprovision
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# Personal music libraries are selected at runtime and must never be committed.
 *.mp3
 *.wav
 *.flac

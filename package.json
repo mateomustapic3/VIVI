@@ -1,14 +1,19 @@
 {
   "name": "vivi-virtual-vinyl",
   "productName": "VIVI - Virtual Vinyl",
-  "version": "0.1.0",
+  "version": "1.1.0",
+  "description": "A high-detail virtual vinyl desktop player for local music libraries.",
+  "author": "mateomustapic3",
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "concurrently \"vite --host 127.0.0.1 --strictPort\" \"wait-on http://127.0.0.1:5173 && electron .\"",
     "build": "tsc -b && vite build",
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
@@ -25,7 +30,38 @@
     "@types/react-dom": "latest",
     "concurrently": "latest",
     "electron": "latest",
+    "electron-builder": "^26.15.3",
     "typescript": "latest",
     "wait-on": "latest"
+  },
+  "build": {
+    "appId": "com.mateomustapic3.vivi",
+    "productName": "VIVI - Virtual Vinyl",
+    "artifactName": "VIVI-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    }
   }
 }

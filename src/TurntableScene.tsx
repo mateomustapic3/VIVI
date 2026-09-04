@@ -1,7 +1,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, ContactShadows, Environment, useGLTF } from '@react-three/drei'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
-import { Box3, CanvasTexture, CircleGeometry, DoubleSide, Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three'
+import { Box3, CanvasTexture, CircleGeometry, Color, DoubleSide, Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three'
 import turntableModelUrl from '../turntable_LD.glb?url'
 
 type TurntableSceneProps = {
@@ -11,19 +11,29 @@ type TurntableSceneProps = {
   needleEngaged: boolean
   pitchSemitones: number
   labelTitle: string
+  accentColor: string
 }
 
-const createLabelTexture = (title: string) => {
+const createLabelPalette = (accentColor: string) => {
+  const accent = new Color(accentColor)
+  const light = accent.clone().lerp(new Color('#fff6df'), .3)
+  const dark = accent.clone().lerp(new Color('#160a06'), .43)
+  const ink = accent.clone().lerp(new Color('#080605'), .76)
+  return { light: light.getStyle(), accent: accent.getStyle(), dark: dark.getStyle(), ink: ink.getStyle() }
+}
+
+const createLabelTexture = (title: string, accentColor: string) => {
+  const palette = createLabelPalette(accentColor)
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = 1024
   const context = canvas.getContext('2d')!
   const gradient = context.createRadialGradient(330, 260, 35, 512, 512, 560)
-  gradient.addColorStop(0, '#ef8e5e')
-  gradient.addColorStop(.72, '#c65031')
-  gradient.addColorStop(1, '#8f321f')
+  gradient.addColorStop(0, palette.light)
+  gradient.addColorStop(.72, palette.accent)
+  gradient.addColorStop(1, palette.dark)
   context.fillStyle = gradient
   context.fillRect(0, 0, 1024, 1024)
-  context.strokeStyle = 'rgba(58, 18, 11, .72)'
+  context.strokeStyle = palette.ink
   context.lineWidth = 12
   context.beginPath()
   context.arc(512, 512, 408, 0, Math.PI * 2)
@@ -43,7 +53,7 @@ const createLabelTexture = (title: string) => {
   })
   const visibleLines = lines.filter(Boolean).slice(0, 3)
   const size = visibleLines.length > 2 ? 44 : visibleLines.length > 1 ? 54 : 62
-  context.fillStyle = '#35170f'
+  context.fillStyle = palette.ink
   context.textAlign = 'center'
   context.textBaseline = 'middle'
   context.font = `700 ${size}px "DM Mono", monospace`
@@ -73,10 +83,11 @@ function CameraAim() {
   return null
 }
 
-function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged, pitchSemitones, labelTitle }: TurntableSceneProps) {
+function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged, pitchSemitones, labelTitle, accentColor }: TurntableSceneProps) {
   const { scene: sourceScene } = useGLTF(turntableModelUrl)
   const scene = useMemo(() => sourceScene.clone(true), [sourceScene])
-  const labelTexture = useMemo(() => createLabelTexture(labelTitle), [labelTitle])
+  const labelTexture = useMemo(() => createLabelTexture(labelTitle, accentColor), [labelTitle, accentColor])
+  const labelInk = useMemo(() => createLabelPalette(accentColor).ink, [accentColor])
   const platterPivot = useRef<Group | null>(null)
   const platterMesh = useRef<Object3D | null>(null)
   const tonearmPivot = useRef<Group | null>(null)
@@ -157,7 +168,7 @@ function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged,
     labelDisc.renderOrder = 2
     const spindleCover = new Mesh(
       new CircleGeometry(.48, 32),
-      new MeshBasicMaterial({ color: '#29140e', side: DoubleSide }),
+      new MeshBasicMaterial({ color: labelInk, side: DoubleSide }),
     )
     spindleCover.position.z = .025
     spindleCover.renderOrder = 3
@@ -173,7 +184,7 @@ function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged,
       ;(spindleCover.material as MeshBasicMaterial).dispose()
       spindleCover.geometry.dispose()
     }
-  }, [hasTrack, labelTexture])
+  }, [hasTrack, labelInk, labelTexture])
 
   useFrame((_, delta) => {
     const phase = MathUtils.degToRad(recordRotation % 360)

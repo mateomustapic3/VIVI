@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
+import type { CSSProperties, DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { createRoot } from 'react-dom/client'
 import { TurntableScene } from './TurntableScene'
+import walnutBackground from './assets/angled-walnut-tabletop-v2.png'
+import lightOakBackground from './assets/light-oak-tabletop.jpg'
+import ebonyBackground from './assets/ebony-wood-tabletop.jpg'
+import metalBackground from './assets/brushed-gunmetal.jpg'
+import concreteBackground from './assets/dark-concrete.jpg'
+import leavesBackground from './assets/forest-leaves.jpg'
 import './styles.css'
 
 type DeckGraph = {
@@ -42,6 +48,18 @@ const accentChoices = [
 ] as const
 
 type AccentId = (typeof accentChoices)[number]['id']
+
+const backgroundChoices = [
+  { id: 'walnut', label: 'Dark walnut', image: walnutBackground },
+  { id: 'oak', label: 'Light oak', image: lightOakBackground },
+  { id: 'ebony', label: 'Black wood', image: ebonyBackground },
+  { id: 'metal', label: 'Gunmetal', image: metalBackground },
+  { id: 'concrete', label: 'Concrete', image: concreteBackground },
+  { id: 'leaves', label: 'Forest leaves', image: leavesBackground },
+  { id: 'black', label: 'Full black', image: null },
+] as const
+
+type BackgroundId = (typeof backgroundChoices)[number]['id'] | 'custom'
 
 type KnobProps = {
   label: string
@@ -199,6 +217,8 @@ function App() {
   const suppressTransportClick = useRef(false)
   const tonearmDrag = useRef<{ wasPlaying: boolean; outsideRecord: boolean } | null>(null)
   const deckPitchDragging = useRef(false)
+  const customBackgroundInput = useRef<HTMLInputElement>(null)
+  const customBackgroundUrl = useRef<string | null>(null)
   const [tracks, setTracks] = useState<Track[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [activeDeck, setActiveDeck] = useState<'a' | 'b'>('a')
@@ -225,9 +245,20 @@ function App() {
   const [tonearmRested, setTonearmRested] = useState(false)
   const [playbackError, setPlaybackError] = useState('')
   const [accentId, setAccentId] = useState<AccentId>('orange')
+  const [backgroundId, setBackgroundId] = useState<BackgroundId>('walnut')
+  const [customBackground, setCustomBackground] = useState<string | null>(null)
+  const [isLightBackground, setIsLightBackground] = useState(false)
+  const [queueDragIndex, setQueueDragIndex] = useState<number | null>(null)
+  const [queueDropIndex, setQueueDropIndex] = useState<number | null>(null)
 
   const activeAccent = accentChoices.find((choice) => choice.id === accentId) ?? accentChoices[0]
+  const activeBackground = backgroundChoices.find((choice) => choice.id === backgroundId) ?? backgroundChoices[0]
+  const backgroundImage = backgroundId === 'custom' ? customBackground : activeBackground.image
+  const activeBackgroundLabel = backgroundId === 'custom' ? 'Custom image' : activeBackground.label
   const accentStyle = { '--accent': activeAccent.color } as CSSProperties
+  const turntablePanelStyle = {
+    '--turntable-background': backgroundImage ? `url("${backgroundImage}")` : 'linear-gradient(#050505, #050505)',
+  } as CSSProperties
 
   const current = tracks[currentIndex]
   const displayTitle = current?.name.replace(/^\d{1,3}[.\s_-]+/, '') ?? 'Drop some music in your library'
@@ -243,6 +274,52 @@ function App() {
   useEffect(() => {
     if (current) setTonearmRested(false)
   }, [current?.path])
+
+  useEffect(() => () => {
+    if (customBackgroundUrl.current) URL.revokeObjectURL(customBackgroundUrl.current)
+  }, [])
+
+  useEffect(() => {
+    if (!backgroundImage) {
+      setIsLightBackground(false)
+      return
+    }
+
+    let cancelled = false
+    const image = new Image()
+    image.decoding = 'async'
+    image.onload = () => {
+      try {
+        const size = 48
+        const canvas = document.createElement('canvas')
+        canvas.width = size
+        canvas.height = size
+        const context = canvas.getContext('2d', { willReadFrequently: true })
+        if (!context) return
+        context.drawImage(image, 0, 0, size, size)
+        const pixels = context.getImageData(0, 0, size, size).data
+        let luminance = 0
+        for (let index = 0; index < pixels.length; index += 4) {
+          const linear = (channel: number) => {
+            const value = channel / 255
+            return value <= .04045 ? value / 12.92 : Math.pow((value + .055) / 1.055, 2.4)
+          }
+          luminance += .2126 * linear(pixels[index]) + .7152 * linear(pixels[index + 1]) + .0722 * linear(pixels[index + 2])
+        }
+        // This is deliberately based on the actual selected bitmap so custom
+        // images receive the same treatment as the built-in surfaces.
+        if (!cancelled) setIsLightBackground(luminance / (pixels.length / 4) > .27)
+      } catch {
+        if (!cancelled) setIsLightBackground(false)
+      }
+    }
+    image.onerror = () => {
+      if (!cancelled) setIsLightBackground(false)
+    }
+    image.src = backgroundImage
+
+    return () => { cancelled = true }
+  }, [backgroundImage])
 
   const getDeck = (deck: 'a' | 'b') => deck === 'a' ? deckA.current : deckB.current
   const inactiveDeck = activeDeck === 'a' ? 'b' : 'a'
@@ -732,6 +809,67 @@ function App() {
     setTracks((existing) => [...existing, ...incoming.filter((track) => !existing.some((item) => item.path === track.path))])
   }
 
+  const clearQueueDrag = () => {
+    setQueueDragIndex(null)
+    setQueueDropIndex(null)
+  }
+
+  const beginQueueDrag = (event: ReactDragEvent<HTMLDivElement>, index: number) => {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', String(index))
+    setQueueDragIndex(index)
+    setQueueDropIndex(index)
+  }
+
+  const allowQueueDrop = (event: ReactDragEvent<HTMLDivElement>, index: number) => {
+    if (queueDragIndex === null || queueDragIndex === index) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+    setQueueDropIndex(index)
+  }
+
+  const reorderTracks = (fromIndex: number, targetIndex: number) => {
+    if (fromIndex < 0 || targetIndex < 0 || fromIndex >= tracks.length || targetIndex > tracks.length || fromIndex === targetIndex) return
+    const nextTracks = [...tracks]
+    const [moved] = nextTracks.splice(fromIndex, 1)
+    const insertionIndex = fromIndex < targetIndex ? targetIndex - 1 : targetIndex
+    nextTracks.splice(insertionIndex, 0, moved)
+    setTracks(nextTracks)
+    if (current) setCurrentIndex(nextTracks.findIndex((track) => track.path === current.path))
+  }
+
+  const dropQueueTrack = (event: ReactDragEvent<HTMLDivElement>, targetIndex: number) => {
+    event.preventDefault()
+    const fromIndex = Number(event.dataTransfer.getData('text/plain'))
+    if (Number.isInteger(fromIndex)) reorderTracks(fromIndex, targetIndex)
+    clearQueueDrag()
+  }
+
+  const removeTrack = (index: number) => {
+    const removed = tracks[index]
+    if (!removed) return
+    const nextTracks = tracks.filter((track) => track.path !== removed.path)
+    const removingCurrent = index === currentIndex
+    if (removingCurrent) {
+      stopCrossfade()
+      stopTapeRamp()
+      deckA.current?.pause()
+      deckB.current?.pause()
+      setPlaying(false)
+      setIsTapeStopping(false)
+      setPosition(0)
+      setDuration(0)
+      setTonearmRested(true)
+    }
+    setTracks(nextTracks)
+    setCurrentIndex((activeIndex) => {
+      if (!nextTracks.length) return 0
+      if (activeIndex > index) return activeIndex - 1
+      if (activeIndex === index) return Math.min(index, nextTracks.length - 1)
+      return activeIndex
+    })
+  }
+
   const selectEqPreset = (preset: EqPreset) => {
     if (preset === 'Custom') return
     setEqPreset(preset)
@@ -746,6 +884,25 @@ function App() {
   const changePitch = (value: number) => {
     pitchSemitonesRef.current = value
     setPitchSemitones(value)
+  }
+
+  const clearCustomBackground = () => {
+    if (customBackgroundUrl.current) URL.revokeObjectURL(customBackgroundUrl.current)
+    customBackgroundUrl.current = null
+    setCustomBackground(null)
+  }
+
+  const chooseCustomBackground = () => customBackgroundInput.current?.click()
+
+  const loadCustomBackground = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0]
+    event.currentTarget.value = ''
+    if (!file || !file.type.startsWith('image/')) return
+    if (customBackgroundUrl.current) URL.revokeObjectURL(customBackgroundUrl.current)
+    const source = URL.createObjectURL(file)
+    customBackgroundUrl.current = source
+    setCustomBackground(source)
+    setBackgroundId('custom')
   }
 
   const setDeckPitchFromPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -796,6 +953,8 @@ function App() {
     setVolume(.8)
     setMasterVolume(.8)
     setAccentId('orange')
+    setBackgroundId('walnut')
+    clearCustomBackground()
   }
 
   const getRecordAngle = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -1129,14 +1288,14 @@ function App() {
       <div className="vinyl-setting"><p className="eyebrow">VINYL SOUND</p><div><span>Warmth</span><strong>{vinylLabel}</strong></div><input aria-label="Vinyl sound intensity" type="range" min="0" max="100" step="1" value={vinylAmount} onChange={(event) => setVinylAmount(Number(event.target.value))} /><small>Warmth, saturation and record noise</small></div>
       <div className="lofi-setting"><p className="eyebrow">VINYL AGE</p><div><span>Lo-Fi intensity</span><strong>{loFiLabel}</strong></div><input aria-label="Lo-Fi intensity: simulated vinyl age" type="range" min="0" max="100" step="1" value={loFiAmount} onChange={(event) => setLoFiAmount(Number(event.target.value))} /><small>Age and tone loss · wobble after 92% · no digital bitrate</small></div>
       <div className="crackle-setting"><p className="eyebrow">SURFACE NOISE</p><div><span>Crackle</span><strong>{crackleLabel}</strong></div><input aria-label="Crackle frequency" type="range" min="0" max="100" step="1" value={crackleAmount} onChange={(event) => setCrackleAmount(Number(event.target.value))} /><small>How often the record pops and crackles</small></div>
-      <div className="colour-setting"><p className="eyebrow">APPEARANCE</p><div><span>Change Color</span><strong>{activeAccent.label}</strong></div><div className="colour-swatches" role="group" aria-label="Change accent color">{accentChoices.map((choice) => <button key={choice.id} type="button" className={choice.id === accentId ? 'active' : ''} aria-label={`${choice.label} accent`} aria-pressed={choice.id === accentId} onClick={() => setAccentId(choice.id)} style={{ '--swatch': choice.color } as CSSProperties} />)}</div></div>
+      <div className="colour-setting"><p className="eyebrow">APPEARANCE</p><div className="appearance-row"><span>Change Color</span><strong>{activeAccent.label}</strong></div><div className="colour-swatches" role="group" aria-label="Change accent color">{accentChoices.map((choice) => <button key={choice.id} type="button" className={choice.id === accentId ? 'active' : ''} aria-label={`${choice.label} accent`} aria-pressed={choice.id === accentId} onClick={() => setAccentId(choice.id)} style={{ '--swatch': choice.color } as CSSProperties} />)}</div><div className="appearance-row background-row"><span>Background</span><strong>{activeBackgroundLabel}</strong></div><div className="background-swatches" role="group" aria-label="Change background">{backgroundChoices.map((choice) => <button key={choice.id} type="button" className={choice.id === backgroundId ? 'active' : ''} aria-label={choice.label} title={choice.label} aria-pressed={choice.id === backgroundId} onClick={() => setBackgroundId(choice.id)} style={choice.image ? { backgroundImage: `url("${choice.image}")` } : undefined} />)}</div><input ref={customBackgroundInput} className="custom-background-input" type="file" accept="image/*" aria-label="Choose a custom background image" onChange={loadCustomBackground} /><button type="button" className={`custom-background-button ${backgroundId === 'custom' ? 'active' : ''}`} onClick={chooseCustomBackground}>+ CUSTOM IMAGE</button></div>
       <button type="button" className="reset-button" onClick={resetSettings}>RESET</button>
     </aside>
 
-    <section className="turntable-panel">
+    <section className={`turntable-panel ${isLightBackground ? 'is-light-background' : ''}`} style={turntablePanelStyle}>
       <div className="now-playing"><p className="eyebrow">NOW PLAYING</p><h1>{displayTitle}</h1><p>{playbackError || (current ? `Track ${currentIndex + 1} of ${tracks.length}` : 'Your personal listening room')}</p></div>
       <div className="turntable three-turntable">
-        <TurntableScene recordRotation={recordRotation} trackProgress={trackProgress} hasTrack={Boolean(current)} needleEngaged={Boolean(current) && !tonearmRested} pitchSemitones={pitchSemitones} labelTitle={displayTitle} />
+        <TurntableScene recordRotation={recordRotation} trackProgress={trackProgress} hasTrack={Boolean(current)} needleEngaged={Boolean(current) && !tonearmRested} pitchSemitones={pitchSemitones} labelTitle={displayTitle} accentColor={activeAccent.color} />
         <div className={`model-scratch-surface ${isScratching || isScratchInertia ? 'scratching' : ''}`} onPointerDown={handleTurntablePointerDown} onPointerMove={handleTurntablePointerMove} onPointerUp={handleTurntablePointerEnd} onPointerCancel={handleTurntablePointerEnd} />
         <div className="turntable-hardware" aria-label="Turntable controls">
           <button type="button" className={`deck-button deck-play ${current ? (playing ? 'is-playing' : 'is-paused') : 'is-idle'}`} aria-label={playing ? 'Pause turntable' : 'Play turntable'} aria-pressed={playing} onClick={togglePlayback} />
@@ -1159,7 +1318,7 @@ function App() {
       </section>
     </section>
 
-    <aside className="queue"><div className="queue-header"><div><p className="eyebrow">ON THIS RECORD</p><h2>Queue</h2></div><span>{tracks.length} tracks</span></div><div className="track-list">{tracks.length === 0 ? <p className="empty-queue">Your selected songs will appear here.</p> : <>{tracks.map((track, index) => <button key={track.path} className={`track ${index === currentIndex ? 'active' : ''}`} onClick={() => selectTrack(index)}><span>{String(index + 1).padStart(2, '0')}</span><strong>{track.name}</strong>{index === currentIndex && playing && <i>●</i>}</button>)}<p className="queue-helper">Choose a music folder to add songs to the end of your queue. MP3, WAV, FLAC and OGG are supported.</p></>}</div></aside>
+    <aside className="queue"><div className="queue-header"><div><p className="eyebrow">ON THIS RECORD</p><h2>Queue</h2></div><span>{tracks.length} tracks</span></div><div className="track-list">{tracks.length === 0 ? <p className="empty-queue">Your selected songs will appear here.</p> : <>{tracks.map((track, index) => <div key={track.path} className={`track-row ${queueDragIndex === index ? 'dragging' : ''} ${queueDropIndex === index && queueDragIndex !== index ? 'drop-target' : ''}`} draggable onDragStart={(event) => beginQueueDrag(event, index)} onDragOver={(event) => allowQueueDrop(event, index)} onDrop={(event) => dropQueueTrack(event, index)} onDragEnd={clearQueueDrag}><button type="button" className={`track ${index === currentIndex ? 'active' : ''}`} onClick={() => selectTrack(index)}><span>{String(index + 1).padStart(2, '0')}</span><strong>{track.name}</strong>{index === currentIndex && playing && <i>●</i>}</button><button type="button" className="remove-track" aria-label={`Remove ${track.name} from queue`} title="Remove from queue" onClick={() => removeTrack(index)}>×</button></div>)}<div className={`queue-drop-end ${queueDropIndex === tracks.length ? 'drop-target' : ''}`} onDragOver={(event) => allowQueueDrop(event, tracks.length)} onDrop={(event) => dropQueueTrack(event, tracks.length)}>Drop here to move to the end</div><p className="queue-helper">Drag songs to reorder them. Use × to remove a song from the queue.</p></>}</div></aside>
   </main>
 }
 
