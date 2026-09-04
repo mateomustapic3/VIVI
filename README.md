@@ -1,6 +1,3 @@
-Naravno — kopiraj cijeli sadržaj ispod direktno u `README.md`:
-
-````md
 <p align="center">
   <img src="https://raw.githubusercontent.com/mateomustapic3/VIVI/main/build/icon.png" width="112" alt="VIVI icon">
 </p>
@@ -194,4 +191,3 @@ git push origin v1.2.3
 ## License
 
 This project is currently intended for personal use. Add a licence file before redistributing or accepting external contributions.
-````
