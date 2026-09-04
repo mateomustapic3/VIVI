@@ -1,11 +1,13 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Center, ContactShadows, Environment, useGLTF } from '@react-three/drei'
-import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { memo, Suspense, useEffect, useMemo, useRef } from 'react'
+import type { MutableRefObject } from 'react'
 import { Box3, CanvasTexture, CircleGeometry, Color, DoubleSide, Group, MathUtils, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three'
 import turntableModelUrl from '../turntable_LD.glb?url'
 
 type TurntableSceneProps = {
-  recordRotation: number
+  recordRotationRef: MutableRefObject<number>
+  animationActive: boolean
   trackProgress: number
   hasTrack: boolean
   needleEngaged: boolean
@@ -83,7 +85,7 @@ function CameraAim() {
   return null
 }
 
-function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged, pitchSemitones, labelTitle, accentColor }: TurntableSceneProps) {
+function AnimatedModel({ recordRotationRef, animationActive, trackProgress, hasTrack, needleEngaged, pitchSemitones, labelTitle, accentColor }: TurntableSceneProps) {
   const { scene: sourceScene } = useGLTF(turntableModelUrl)
   const scene = useMemo(() => sourceScene.clone(true), [sourceScene])
   const labelTexture = useMemo(() => createLabelTexture(labelTitle, accentColor), [labelTitle, accentColor])
@@ -186,8 +188,9 @@ function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged,
     }
   }, [hasTrack, labelInk, labelTexture])
 
-  useFrame((_, delta) => {
-    const phase = MathUtils.degToRad(recordRotation % 360)
+  useFrame((state, delta) => {
+    const phase = MathUtils.degToRad(recordRotationRef.current % 360)
+    let needsNextFrame = animationActive
     if (platterPivot.current) {
       // The source model is authored in FBX coordinates. In its local space
       // the platter is an XY disc, so its normal is Z — rotating around Y was
@@ -205,6 +208,7 @@ function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged,
       // playable groove around the label instead of crossing over its centre.
       const targetAngle = needleEngaged ? MathUtils.lerp(-.215, -.52, trackProgress) : 0
       tonearmPivot.current.rotation.z = MathUtils.damp(tonearmPivot.current.rotation.z, targetAngle, 8, delta)
+      needsNextFrame ||= Math.abs(tonearmPivot.current.rotation.z - targetAngle) > .0001
       // The arm rocks around its bearing: the cartridge follows the record
       // down while the counterweight above the bearing moves the other way.
       tonearmPivot.current.rotation.x = needleEngaged ? Math.sin(phase * 1.7) * .0045 : 0
@@ -216,7 +220,12 @@ function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged,
       // the pitch rail. Damping makes it feel like a weighted physical fader.
       const targetY = pitchFaderOrigin.current.y + amount * 7.8
       pitchFader.current.position.y = MathUtils.damp(pitchFader.current.position.y, targetY, 18, delta)
+      needsNextFrame ||= Math.abs(pitchFader.current.position.y - targetY) > .0001
     }
+    // The renderer sleeps completely while the deck is still. React prop
+    // changes wake it, then the scene keeps only short mechanical settles
+    // alive until their damped movement reaches the target.
+    if (needsNextFrame) state.invalidate()
   })
 
   // This asset is exported in centimetre-like units, so it needs a small
@@ -224,13 +233,14 @@ function AnimatedModel({ recordRotation, trackProgress, hasTrack, needleEngaged,
   return <group position={[0, .16, 0]}><Center><group scale={.053}><primitive object={scene} /></group></Center></group>
 }
 
-export function TurntableScene(props: TurntableSceneProps) {
+export const TurntableScene = memo(function TurntableScene(props: TurntableSceneProps) {
   return <Canvas
     className="turntable-canvas"
+    frameloop="demand"
     shadows
     dpr={[1, 2]}
     camera={{ position: [0, 5.25, 4.25], fov: 32 }}
-    gl={{ antialias: true, alpha: true }}
+    gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
     onCreated={({ gl }) => { gl.toneMappingExposure = .84 }}
   >
     <CameraAim />
@@ -240,8 +250,8 @@ export function TurntableScene(props: TurntableSceneProps) {
     <directionalLight position={[-3, 4, 3]} intensity={.7} color="#dce8ff" />
     <Environment preset="warehouse" environmentIntensity={.78} />
     <Suspense fallback={null}><AnimatedModel {...props} /></Suspense>
-    <ContactShadows position={[0, -.66, 0]} opacity={.38} scale={6.2} blur={2.8} far={3.5} color="#100905" />
+    <ContactShadows frames={1} position={[0, -.66, 0]} opacity={.38} scale={6.2} blur={2.8} far={3.5} color="#100905" />
   </Canvas>
-}
+})
 
 useGLTF.preload(turntableModelUrl)

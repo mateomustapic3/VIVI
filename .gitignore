@@ -3,16 +3,24 @@ node_modules/
 dist/
 release/
 out/
+coverage/
+.nyc_output/
 *.asar
 *.dmg
+*.pkg
 *.exe
 *.msi
 *.AppImage
 *.deb
+*.rpm
+*.zip
 
 # Logs, test output and tool caches
 *.log
 *.log.*
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 coverage/
 .nyc_output/
 .vite/
@@ -27,6 +35,7 @@ coverage/
 *.p12
 *.pfx
 *.cer
+*.key
 *.mobileprovision
 
 # Editor and operating-system files
@@ -38,6 +47,7 @@ Thumbs.db
 !.vscode/settings.json
 *.swp
 *.swo
+*~
 
 # Personal music libraries are selected at runtime and must never be committed.
 *.mp3

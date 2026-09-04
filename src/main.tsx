@@ -2,13 +2,23 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import { createRoot } from 'react-dom/client'
 import { TurntableScene } from './TurntableScene'
-import walnutBackground from './assets/angled-walnut-tabletop-v2.png'
-import lightOakBackground from './assets/light-oak-tabletop.jpg'
-import ebonyBackground from './assets/ebony-wood-tabletop.jpg'
-import metalBackground from './assets/brushed-gunmetal.jpg'
-import concreteBackground from './assets/dark-concrete.jpg'
-import leavesBackground from './assets/forest-leaves.jpg'
+import walnutPreview from './assets/previews/walnut.jpg'
+import lightOakPreview from './assets/previews/light-oak.jpg'
+import ebonyPreview from './assets/previews/ebony.jpg'
+import metalPreview from './assets/previews/gunmetal.jpg'
+import concretePreview from './assets/previews/concrete.jpg'
+import leavesPreview from './assets/previews/leaves.jpg'
 import './styles.css'
+
+// Keep the full-resolution surfaces out of the first UI paint. Vite still
+// fingerprints them for production, but the browser fetches only the active
+// background; the appearance picker uses tiny preview images instead.
+const walnutBackground = new URL('./assets/angled-walnut-tabletop-v2.png', import.meta.url).href
+const lightOakBackground = new URL('./assets/light-oak-tabletop.jpg', import.meta.url).href
+const ebonyBackground = new URL('./assets/ebony-wood-tabletop.jpg', import.meta.url).href
+const metalBackground = new URL('./assets/brushed-gunmetal.jpg', import.meta.url).href
+const concreteBackground = new URL('./assets/dark-concrete.jpg', import.meta.url).href
+const leavesBackground = new URL('./assets/forest-leaves.jpg', import.meta.url).href
 
 type DeckGraph = {
   pitch: ScriptProcessorNode
@@ -17,6 +27,7 @@ type DeckGraph = {
   ageLowpass: BiquadFilterNode
   filter: BiquadFilterNode
   saturation: WaveShaperNode
+  saturationDrive: number
   level: GainNode
   reverb: ConvolverNode
   reverbGain: GainNode
@@ -50,13 +61,13 @@ const accentChoices = [
 type AccentId = (typeof accentChoices)[number]['id']
 
 const backgroundChoices = [
-  { id: 'walnut', label: 'Dark walnut', image: walnutBackground },
-  { id: 'oak', label: 'Light oak', image: lightOakBackground },
-  { id: 'ebony', label: 'Black wood', image: ebonyBackground },
-  { id: 'metal', label: 'Gunmetal', image: metalBackground },
-  { id: 'concrete', label: 'Concrete', image: concreteBackground },
-  { id: 'leaves', label: 'Forest leaves', image: leavesBackground },
-  { id: 'black', label: 'Full black', image: null },
+  { id: 'walnut', label: 'Dark walnut', image: walnutBackground, preview: walnutPreview },
+  { id: 'oak', label: 'Light oak', image: lightOakBackground, preview: lightOakPreview },
+  { id: 'ebony', label: 'Black wood', image: ebonyBackground, preview: ebonyPreview },
+  { id: 'metal', label: 'Gunmetal', image: metalBackground, preview: metalPreview },
+  { id: 'concrete', label: 'Concrete', image: concreteBackground, preview: concretePreview },
+  { id: 'leaves', label: 'Forest leaves', image: leavesBackground, preview: leavesPreview },
+  { id: 'black', label: 'Full black', image: null, preview: null },
 ] as const
 
 type BackgroundId = (typeof backgroundChoices)[number]['id'] | 'custom'
@@ -141,6 +152,11 @@ const createPitchShifter = (context: AudioContext, getSemitones: () => number) =
   processor.onaudioprocess = (event) => {
     const input = event.inputBuffer
     const output = event.outputBuffer
+    const inputChannels = [
+      input.getChannelData(0),
+      input.getChannelData(Math.min(1, input.numberOfChannels - 1)),
+    ]
+    const outputChannels = [output.getChannelData(0), output.getChannelData(1)]
     const targetRatio = Math.pow(2, getSemitones() / 12)
     // A short block-level glide avoids discontinuities without the expensive
     // four-grain loop that could cause audible buffer underruns on Electron.
@@ -149,8 +165,7 @@ const createPitchShifter = (context: AudioContext, getSemitones: () => number) =
     const phaseStep = (1 - smoothRatio) / 2_048
     for (let sample = 0; sample < output.length; sample += 1) {
       for (let channel = 0; channel < 2; channel += 1) {
-        const inputChannel = input.getChannelData(Math.min(channel, input.numberOfChannels - 1))
-        ring[channel][writeIndex] = inputChannel[sample] ?? 0
+        ring[channel][writeIndex] = inputChannels[channel][sample] ?? 0
       }
       if (shifted) {
         phase = (phase + phaseStep + 1) % 1
@@ -161,13 +176,13 @@ const createPitchShifter = (context: AudioContext, getSemitones: () => number) =
         const gainB = Math.sin(Math.PI * phaseB)
         const normalise = 1 / Math.max(gainA + gainB, .0001)
         for (let channel = 0; channel < 2; channel += 1) {
-          output.getChannelData(channel)[sample] = (
+          outputChannels[channel][sample] = (
             read(ring[channel], writeIndex - delayA) * gainA +
             read(ring[channel], writeIndex - delayB) * gainB
           ) * normalise
         }
       } else {
-        for (let channel = 0; channel < 2; channel += 1) output.getChannelData(channel)[sample] = ring[channel][writeIndex]
+        for (let channel = 0; channel < 2; channel += 1) outputChannels[channel][sample] = ring[channel][writeIndex]
       }
       writeIndex = (writeIndex + 1) % ringSize
     }
@@ -237,11 +252,9 @@ function App() {
   const [eqPreset, setEqPreset] = useState<EqPreset>('Flat')
   const [rpm, setRpm] = useState(33)
   const [pitchSemitones, setPitchSemitones] = useState(0)
-  const [tapeFactor, setTapeFactor] = useState(1)
   const [isTapeStopping, setIsTapeStopping] = useState(false)
   const [isScratching, setIsScratching] = useState(false)
   const [isScratchInertia, setIsScratchInertia] = useState(false)
-  const [recordRotation, setRecordRotation] = useState(0)
   const [tonearmRested, setTonearmRested] = useState(false)
   const [playbackError, setPlaybackError] = useState('')
   const [accentId, setAccentId] = useState<AccentId>('orange')
@@ -330,7 +343,6 @@ function App() {
 
   const rotateRecord = (degrees: number) => {
     recordRotationRef.current += degrees
-    setRecordRotation(recordRotationRef.current)
   }
 
   const applyPlaybackRate = (factor = tapeFactorRef.current) => {
@@ -366,7 +378,6 @@ function App() {
       tapeFrame.current = null
       tapeSafetyTimer.current = null
       tapeFactorRef.current = target
-      setTapeFactor(target)
       applyPlaybackRate(target)
       onComplete?.()
     }
@@ -375,7 +386,6 @@ function App() {
       const eased = 1 - Math.pow(1 - progress, 3)
       const factor = start + (target - start) * eased
       tapeFactorRef.current = factor
-      setTapeFactor(factor)
       applyPlaybackRate(factor)
       if (progress < 1) tapeFrame.current = requestAnimationFrame(step)
       else complete()
@@ -390,7 +400,6 @@ function App() {
   const prepareTapeStart = () => {
     stopTapeRamp()
     tapeFactorRef.current = .16
-    setTapeFactor(.16)
     applyPlaybackRate(.16)
   }
 
@@ -479,7 +488,10 @@ function App() {
       graph.filter.frequency.setTargetAtTime(20_000 - amount * 9_500, now, .04)
       graph.filter.Q.setTargetAtTime(.2 + amount * .45, now, .04)
       const drive = Math.max(amount, age * 1.5)
-      graph.saturation.curve = drive > 0 ? makeSaturationCurve(drive) : null
+      if (graph.saturationDrive !== drive) {
+        graph.saturation.curve = drive > 0 ? makeSaturationCurve(drive) : null
+        graph.saturationDrive = drive
+      }
       graph.level.gain.setTargetAtTime(1 - age * .06, now, .04)
       graph.reverbGain.gain.setTargetAtTime(reverbAmount / 100 * .55, now, .04)
     }
@@ -595,7 +607,7 @@ function App() {
       for (let index = 0; index < eq.length - 1; index += 1) eq[index].connect(eq[index + 1])
       eq[eq.length - 1].connect(ageHighpass).connect(ageLowpass).connect(filter).connect(saturation).connect(level).connect(master)
       level.connect(reverb).connect(reverbGain).connect(master)
-      return { pitch, eq, ageHighpass, ageLowpass, filter, saturation, level, reverb, reverbGain }
+      return { pitch, eq, ageHighpass, ageLowpass, filter, saturation, saturationDrive: Number.NaN, level, reverb, reverbGain }
     }
 
     deckGraphs.current = [connectDeck(firstDeck), connectDeck(secondDeck)]
@@ -1060,7 +1072,6 @@ function App() {
       }
     } else {
       tapeFactorRef.current = 1
-      setTapeFactor(1)
       applyPlaybackRate(1)
     }
   }
@@ -1102,7 +1113,6 @@ function App() {
       player?.pause()
       if (player) player.currentTime = 0
       recordRotationRef.current = 0
-      setRecordRotation(0)
       setPosition(0)
       setPlaying(false)
       setTonearmRested(true)
@@ -1288,14 +1298,14 @@ function App() {
       <div className="vinyl-setting"><p className="eyebrow">VINYL SOUND</p><div><span>Warmth</span><strong>{vinylLabel}</strong></div><input aria-label="Vinyl sound intensity" type="range" min="0" max="100" step="1" value={vinylAmount} onChange={(event) => setVinylAmount(Number(event.target.value))} /><small>Warmth, saturation and record noise</small></div>
       <div className="lofi-setting"><p className="eyebrow">VINYL AGE</p><div><span>Lo-Fi intensity</span><strong>{loFiLabel}</strong></div><input aria-label="Lo-Fi intensity: simulated vinyl age" type="range" min="0" max="100" step="1" value={loFiAmount} onChange={(event) => setLoFiAmount(Number(event.target.value))} /><small>Age and tone loss · wobble after 92% · no digital bitrate</small></div>
       <div className="crackle-setting"><p className="eyebrow">SURFACE NOISE</p><div><span>Crackle</span><strong>{crackleLabel}</strong></div><input aria-label="Crackle frequency" type="range" min="0" max="100" step="1" value={crackleAmount} onChange={(event) => setCrackleAmount(Number(event.target.value))} /><small>How often the record pops and crackles</small></div>
-      <div className="colour-setting"><p className="eyebrow">APPEARANCE</p><div className="appearance-row"><span>Change Color</span><strong>{activeAccent.label}</strong></div><div className="colour-swatches" role="group" aria-label="Change accent color">{accentChoices.map((choice) => <button key={choice.id} type="button" className={choice.id === accentId ? 'active' : ''} aria-label={`${choice.label} accent`} aria-pressed={choice.id === accentId} onClick={() => setAccentId(choice.id)} style={{ '--swatch': choice.color } as CSSProperties} />)}</div><div className="appearance-row background-row"><span>Background</span><strong>{activeBackgroundLabel}</strong></div><div className="background-swatches" role="group" aria-label="Change background">{backgroundChoices.map((choice) => <button key={choice.id} type="button" className={choice.id === backgroundId ? 'active' : ''} aria-label={choice.label} title={choice.label} aria-pressed={choice.id === backgroundId} onClick={() => setBackgroundId(choice.id)} style={choice.image ? { backgroundImage: `url("${choice.image}")` } : undefined} />)}</div><input ref={customBackgroundInput} className="custom-background-input" type="file" accept="image/*" aria-label="Choose a custom background image" onChange={loadCustomBackground} /><button type="button" className={`custom-background-button ${backgroundId === 'custom' ? 'active' : ''}`} onClick={chooseCustomBackground}>+ CUSTOM IMAGE</button></div>
+      <div className="colour-setting"><p className="eyebrow">APPEARANCE</p><div className="appearance-row"><span>Change Color</span><strong>{activeAccent.label}</strong></div><div className="colour-swatches" role="group" aria-label="Change accent color">{accentChoices.map((choice) => <button key={choice.id} type="button" className={choice.id === accentId ? 'active' : ''} aria-label={`${choice.label} accent`} aria-pressed={choice.id === accentId} onClick={() => setAccentId(choice.id)} style={{ '--swatch': choice.color } as CSSProperties} />)}</div><div className="appearance-row background-row"><span>Background</span><strong>{activeBackgroundLabel}</strong></div><div className="background-swatches" role="group" aria-label="Change background">{backgroundChoices.map((choice) => <button key={choice.id} type="button" className={choice.id === backgroundId ? 'active' : ''} aria-label={choice.label} title={choice.label} aria-pressed={choice.id === backgroundId} onClick={() => setBackgroundId(choice.id)} style={choice.preview ? { backgroundImage: `url("${choice.preview}")` } : undefined} />)}</div><input ref={customBackgroundInput} className="custom-background-input" type="file" accept="image/*" aria-label="Choose a custom background image" onChange={loadCustomBackground} /><button type="button" className={`custom-background-button ${backgroundId === 'custom' ? 'active' : ''}`} onClick={chooseCustomBackground}>+ CUSTOM IMAGE</button></div>
       <button type="button" className="reset-button" onClick={resetSettings}>RESET</button>
     </aside>
 
     <section className={`turntable-panel ${isLightBackground ? 'is-light-background' : ''}`} style={turntablePanelStyle}>
       <div className="now-playing"><p className="eyebrow">NOW PLAYING</p><h1>{displayTitle}</h1><p>{playbackError || (current ? `Track ${currentIndex + 1} of ${tracks.length}` : 'Your personal listening room')}</p></div>
       <div className="turntable three-turntable">
-        <TurntableScene recordRotation={recordRotation} trackProgress={trackProgress} hasTrack={Boolean(current)} needleEngaged={Boolean(current) && !tonearmRested} pitchSemitones={pitchSemitones} labelTitle={displayTitle} accentColor={activeAccent.color} />
+        <TurntableScene recordRotationRef={recordRotationRef} animationActive={playing || isTapeStopping || isScratching || isScratchInertia} trackProgress={trackProgress} hasTrack={Boolean(current)} needleEngaged={Boolean(current) && !tonearmRested} pitchSemitones={pitchSemitones} labelTitle={displayTitle} accentColor={activeAccent.color} />
         <div className={`model-scratch-surface ${isScratching || isScratchInertia ? 'scratching' : ''}`} onPointerDown={handleTurntablePointerDown} onPointerMove={handleTurntablePointerMove} onPointerUp={handleTurntablePointerEnd} onPointerCancel={handleTurntablePointerEnd} />
         <div className="turntable-hardware" aria-label="Turntable controls">
           <button type="button" className={`deck-button deck-play ${current ? (playing ? 'is-playing' : 'is-paused') : 'is-idle'}`} aria-label={playing ? 'Pause turntable' : 'Play turntable'} aria-pressed={playing} onClick={togglePlayback} />

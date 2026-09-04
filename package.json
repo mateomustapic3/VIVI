@@ -1,7 +1,7 @@
 {
   "name": "vivi-virtual-vinyl",
   "productName": "VIVI - Virtual Vinyl",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A high-detail virtual vinyl desktop player for local music libraries.",
   "author": "mateomustapic3",
   "private": true,
