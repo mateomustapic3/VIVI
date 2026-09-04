@@ -55,5 +55,6 @@ jobs:
       - name: Create GitHub release and attach installers
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           gh release create "${GITHUB_REF_NAME}" installers/* --generate-notes
